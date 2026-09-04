@@ -1,53 +1,30 @@
-import time
+from adafruit_ina219 import ADCResolution, BusVoltageRange, INA219
 import board
-from adafruit_ina219 import INA219
+import busio
+import logging
 
-class CapteurINA219:
-    def __init__(self, adresse=0x40):
-        self.adresse = adresse
-        self.ina219 = None
+logger = logging.getLogger(__name__)
 
-    def initialiser(self):
-        try:
-            i2c = board.I2C()
-            self.ina219 = INA219(i2c, addr=self.adresse)
-
-            tension = self.lire_tension()
-
-            print(f"INA219 détecté sur 0x{self.adresse:02X}")
-            print(f"Tension batterie : {tension:.2f} V")
-
-            return True
-
-        except Exception as erreur:
-            self.ina219 = None
-            print(f"Erreur INA219 : {erreur}")
-            return False
-
-    def lire_tension(self):
-        if self.ina219 is None:
-            raise RuntimeError("INA219 non initialisé")
-
+class INA219Sensor:
+    def __init__(self, i2c_address=0x40):
+        self.i2c = busio.I2C(board.SCL, board.SDA)
+        self.ina219 = INA219(self.i2c, addr=i2c_address)
+        
+        # Configuration pour meilleure précision
+        self.ina219.bus_adc_resolution = ADCResolution.ADCRES_12BIT_32S
+        self.ina219.shunt_adc_resolution = ADCResolution.ADCRES_12BIT_32S
+        self.ina219.bus_voltage_range = BusVoltageRange.RANGE_16V
+        
+        logger.info(f"INA219 initialisé à l'adresse 0x{i2c_address:02x}")
+    
+    def get_voltage(self):
+        """Retourne la tension en volts"""
         return self.ina219.bus_voltage
-
-def test():
-    capteur = CapteurINA219()
-
-    if not capteur.initialiser():
-        return
-
-    print()
-    print("Lecture de la tension pendant 30 secondes...")
-    print()
-
-    for _ in range(6):
-        try:
-            tension = capteur.lire_tension()
-            print(f"{time.strftime('%H:%M:%S')}  |  {tension:.2f} V")
-        except Exception as erreur:
-            print(f"Erreur de lecture : {erreur}")
-
-        time.sleep(5)
-
-if __name__ == "__main__":
-    test()
+    
+    def get_current(self):
+        """Retourne le courant en ampères"""
+        return self.ina219.current
+    
+    def get_power(self):
+        """Retourne la puissance en watts"""
+        return self.ina219.power

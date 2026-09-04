@@ -1,0 +1,5 @@
+{
+  "intervalle_lecture": 30,
+  "fichier_etat": "/home/ludo/solarstation/data/etat.json",
+  "ina219_address": "0x40"
+}

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class EtatBatterie:
     tension: float
@@ -7,17 +8,27 @@ class EtatBatterie:
     niveau: str
     tendance: str
 
+
 class GestionBatterie:
+    """
+    Interprétation simple de la tension d'une batterie
+    lithium 12 V.
+
+    ATTENTION :
+    La tension seule ne permet pas de connaître précisément
+    le pourcentage réel de charge.
+    """
+
     def __init__(self):
         self.ancienne_tension = None
 
     def analyser(self, tension):
         """
-        Interprétation simple de la tension d'une batterie lithium 12 V.
+        Analyse la tension et détermine :
 
-        ATTENTION :
-        La tension seule ne permet pas de connaître précisément
-        le pourcentage réel de charge.
+        - l'état de la batterie
+        - le niveau
+        - la tendance
         """
 
         if tension < 12.60:
@@ -44,9 +55,9 @@ class GestionBatterie:
             etat = "Batterie chargée"
             niveau = "chargee"
 
-        # Détermination de la tendance.
-        # On ignore les variations inférieures à 20 mV
-        # pour éviter que l'affichage change constamment.
+        # ----------------------------------------------------
+        # TENDANCE
+        # ----------------------------------------------------
 
         if self.ancienne_tension is None:
             tendance = "stable"
